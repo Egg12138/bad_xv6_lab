@@ -95,3 +95,20 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+
+uint64
+sys_trace(void)
+{
+	/* reg:&trmask will stored the value in the [aMask] register.
+	* trmask = n => n -> an. 0 -> a0, 1 -> a1.
+	* because the width is 32-bits, the n is in the range:[0, 5].->[2^0, 2^5]
+	*/
+	int trmask; // 0 <= trmask <= 5.
+
+	if (argint(0, &trmask) < 0)
+		return -1;
+	myproc()->syscalltrmask = trmask;
+	return trmask;
+
+}
