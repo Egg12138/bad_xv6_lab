@@ -130,10 +130,10 @@ sys_sysinfo(void)
   if (argaddr(0, &sysinfo_p) < 0)
     return -1;
   // 所以当前进程的a0的值已经被sysinfo_p指向了。可以进行修改。
-	//info.nproc = nproc();
-	info.nproc = 1;
-  info.freemem = 1;
-	//info.freemem = kfreemem();
+	info.nproc = nproc();
+	//info.nproc = 1;
+  //info.freemem = 1;
+	info.freemem = kfreemem();
   // 现在这些结构体信息是在物理地址的，我们要将其copyout到虚拟地址中。
   if (copyout(myproc()->pagetable, sysinfo_p, (char *)&info, sizeof(info)) < 0)
     panic("copyout error!\n");

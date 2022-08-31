@@ -3,7 +3,6 @@
 #include "kernel/sysinfo.h"
 #include "user/user.h"
 
-extern int usedpid;
 
 int 
 main(int argc, char* argv[])
@@ -17,8 +16,7 @@ main(int argc, char* argv[])
 	//memset((void *)&info, 0, sizeof(struct sysinfo));
 	// we call the function in the user mode
 	sysinfo((struct sysinfo*)&info);
-	printf("active proc: %d\n", usedpid);
-
+	printf("active proc number:%l, ,freemem:%l\n", info.nproc, info.freemem);
 
 
 	exit(0);
