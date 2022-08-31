@@ -18,7 +18,8 @@
 // PHYSTOP -- end RAM used by the kernel
 
 // qemu puts UART registers here in physical memory.
-#define UART0 0x10000000L
+// which the hex number is the address. we will access these address.
+#define UART0 0x10000000L // 32bits....? why long?
 #define UART0_IRQ 10
 
 // virtio mmio interface
@@ -45,7 +46,8 @@
 // for use by the kernel and user pages
 // from physical address 0x80000000 to PHYSTOP.
 #define KERNBASE 0x80000000L
-#define PHYSTOP (KERNBASE + 128*1024*1024)
+#define RAMSIZE  128*1024*1024
+#define PHYSTOP (KERNBASE + RAMSIZE)
 
 // map the trampoline page to the highest address,
 // in both user and kernel space.

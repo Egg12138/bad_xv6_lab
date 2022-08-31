@@ -107,6 +107,7 @@ extern uint64 sys_wait(void);
 extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
 extern uint64 sys_trace(void);
+extern uint64 sys_sysinfo(void);
 
 #define SYSCALLNUM 22
 static uint64 (*syscalls[])(void) = {
@@ -132,6 +133,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_trace]   sys_trace,
+[SYS_sysinfo] sys_sysinfo,
 };
 static char *syscalllist[SYSCALLNUM] = {
   "fork",
@@ -153,6 +155,7 @@ static char *syscalllist[SYSCALLNUM] = {
   "mknod",
   "close",
   "trace",
+  "sysinfo",
 };
 void
 syscall(void)
@@ -162,6 +165,7 @@ syscall(void)
   struct proc *p = myproc();
   
 
+  // fetch the value of trap frame, (stored in &a7)
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     ret = syscalls[num](); 

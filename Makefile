@@ -132,6 +132,7 @@ UPROGS=\
 	$U/_sh\
 	$U/_sleep\
 	$U/_stressfs\
+	$U/_sysinfotest\
 	$U/_trace\
 	$U/_usertests\
 	$U/_grind\
@@ -172,6 +173,6 @@ qemu: $K/kernel fs.img
 	sed "s/:1234/:$(GDBPORT)/" < $^ > $@
 
 qemu-gdb: $K/kernel .gdbinit fs.img
-	@echo "*** Now run 'gdb' in another window." 1>&2
+	@echo "*** Now run 'gdb' in VScode inner debugger window." 1>&2
 	$(QEMU) $(QEMUOPTS) -S $(QEMUGDB)
 

@@ -13,6 +13,7 @@ struct proc proc[NPROC];
 struct proc *initproc;
 
 int nextpid = 1;
+static int usedpid = 0;
 struct spinlock pid_lock;
 
 extern void forkret(void);
@@ -54,6 +55,9 @@ procinit(void)
       initlock(&p->lock, "proc");
       p->kstack = KSTACK((int) (p - proc));
   }
+  // try to add a global counter
+  usedpid += 1;
+
 }
 
 // Must be called with interrupts disabled,
@@ -592,6 +596,7 @@ kill(int pid)
         p->state = RUNNABLE;
       }
       release(&p->lock);
+      usedpid -= 1;
       return 0;
     }
     release(&p->lock);
@@ -656,4 +661,23 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+
+uint64
+nproc(void)
+{
+
+  int nactive = 0;
+  struct proc *p;
+
+  for (p = proc; p < &proc[NPROC]; p++ ) 
+    if (p->state == USED) 
+      nactive++;
+  return nactive;
+}
+uint32
+nproc_ver1(void)
+{
+  return usedpid;
 }

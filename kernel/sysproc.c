@@ -6,6 +6,9 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "sysinfo.h"
+
+
 
 uint64
 sys_exit(void)
@@ -103,12 +106,37 @@ sys_trace(void)
 	/* reg:&trmask will stored the value in the [aMask] register.
 	* trmask = n => n -> an. 0 -> a0, 1 -> a1.
 	* because the width is 32-bits, the n is in the range:[0, 5].->[2^0, 2^5]
+	printf(1, "")
 	*/
 	int trmask; // 0 <= trmask <= 5.
 
+  // fetch the content of reg_a[0] to the address of trmask.
 	if (argint(0, &trmask) < 0)
 		return -1;
 	myproc()->syscalltrmask = trmask;
 	return trmask;
+}
 
+
+// which return the free mem & num of used proc, (using bit calculation ) ,from the kernel to the user!
+uint64
+sys_sysinfo(void)
+{
+
+  uint64 sysinfo_p;
+	struct sysinfo info;
+
+  // 通过argaddr 使sysinfo_p指向trampframe->a0
+  if (argaddr(0, &sysinfo_p) < 0)
+    return -1;
+  // 所以当前进程的a0的值已经被sysinfo_p指向了。可以进行修改。
+	//info.nproc = nproc();
+	info.nproc = 1;
+  info.freemem = 1;
+	//info.freemem = kfreemem();
+  // 现在这些结构体信息是在物理地址的，我们要将其copyout到虚拟地址中。
+  if (copyout(myproc()->pagetable, sysinfo_p, (char *)&info, sizeof(info)) < 0)
+    panic("copyout error!\n");
+  return 0;
+	
 }

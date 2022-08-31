@@ -1,0 +1,25 @@
+
+#include "kernel/types.h"
+#include "kernel/sysinfo.h"
+#include "user/user.h"
+
+extern int usedpid;
+
+int 
+main(int argc, char* argv[])
+{
+
+	
+
+	struct sysinfo info;
+
+	memset((void *)&info, 0, sizeof(struct sysinfo));
+	//memset((void *)&info, 0, sizeof(struct sysinfo));
+	// we call the function in the user mode
+	sysinfo((struct sysinfo*)&info);
+	printf("active proc: %d\n", usedpid);
+
+
+
+	exit(0);
+}

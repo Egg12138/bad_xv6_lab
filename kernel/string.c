@@ -1,5 +1,6 @@
 #include "types.h"
 
+// fill with `c::Int` to dst.the `n` is the length
 void*
 memset(void *dst, int c, uint n)
 {
