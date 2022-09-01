@@ -7,13 +7,12 @@
 #include "syscall.h"
 #include "defs.h"
 
-
 // Fetch the uint64 at addr from the current process.
 int
 fetchaddr(uint64 addr, uint64 *ip)
 {
   struct proc *p = myproc();
-  if(addr >= p->sz || addr + sizeof(uint64) > p->sz)
+  if(addr >= p->sz || addr+sizeof(uint64) > p->sz)
     return -1;
   if(copyin(p->pagetable, (char *)ip, addr, sizeof(*ip)) != 0)
     return -1;
@@ -32,7 +31,6 @@ fetchstr(uint64 addr, char *buf, int max)
   return strlen(buf);
 }
 
-// get the value stored in first 6 address registers.
 static uint64
 argraw(int n)
 {
@@ -109,7 +107,6 @@ extern uint64 sys_uptime(void);
 extern uint64 sys_trace(void);
 extern uint64 sys_sysinfo(void);
 
-#define SYSCALLNUM 22
 static uint64 (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
 [SYS_exit]    sys_exit,
@@ -135,45 +132,25 @@ static uint64 (*syscalls[])(void) = {
 [SYS_trace]   sys_trace,
 [SYS_sysinfo] sys_sysinfo,
 };
-static char *syscalllist[SYSCALLNUM] = {
-  "fork",
-  "exit", 
-  "wait",
-  "pipe",
-  "read",
-  "kill",
-  "exec", 
-  "fstat",
-  "chdir",
-  "dup",
-  "getpid",
-  "sbrk",
-  "sleep",
-  "uptime",
-  "open",
-  "write",
-  "mknod",
-  "close",
-  "trace",
-  "sysinfo",
+
+static char *syscall_list[23] = {
+  "none",  "fork",  "exit",   "wait",   "pipe",  "read",  "kill",   "exec",
+  "fstat", "chdir", "dup",    "getpid", "sbrk",  "sleep", "uptime", "open",
+  "write", "mknod", "unlink", "link",   "mkdir", "close", "trace"
 };
+
 void
 syscall(void)
 {
-
-  int num, ret;
+  int num;
   struct proc *p = myproc();
-  
 
-  // fetch the value of trap frame, (stored in &a7)
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    ret = syscalls[num](); 
-    p->trapframe->a0 = ret;
-    if(( p->syscalltrmask << num) & 1) 
-      printf("[%d]syscall`%d`:%s->%d, mask = %d\n", p->pid, num, syscalllist[num], p->syscalltrmask);
-
-
+    p->trapframe->a0 = syscalls[num]();
+    if (p->mask & (1 << num))
+      printf("%d: syscall %s -> %d\n", p->pid, syscall_list[num],
+             p->trapframe->a0);
   } else {
     printf("%d %s: unknown sys call %d\n",
             p->pid, p->name, num);

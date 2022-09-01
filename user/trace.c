@@ -3,31 +3,25 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
-
 int
-main(int argc, char * argv[])
+main(int argc, char *argv[])
 {
-	int i;
-	char *execargv[MAXARG];
-	// we have to check whether the second argument is a number
-	if (argc <= 2 || (argv[1][0] < '0') || (argv[1][0] >'9')) {
-		fprintf(2, "Need a proc mask\n");
-		exit(1);
-	}
-	printf("--------\n");
-	if (trace(atoi(argv[1])) < 0) {
-		fprintf(2, "Failed to trace\n");
-		exit(1);
-	}	
+  int i;
+  char *nargv[MAXARG];
 
-	for (i = 0; i < MAXARG; i++) 
-		execargv[i] = argv[i + 2];
-	exec(execargv[0], execargv);
+  if(argc < 3 || (argv[1][0] < '0' || argv[1][0] > '9')){
+    fprintf(2, "Usage: %s mask command\n", argv[0]);
+    exit(1);
+  }
 
-	exit(0);
+  if (trace(atoi(argv[1])) < 0) {
+    fprintf(2, "%s: trace failed\n", argv[0]);
+    exit(1);
+  }
+  
+  for(i = 2; i < argc && i < MAXARG; i++){
+    nargv[i-2] = argv[i];
+  }
+  exec(nargv[0], nargv);
+  exit(0);
 }
-
-	
-
-
-

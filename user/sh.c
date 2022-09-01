@@ -52,7 +52,6 @@ struct backcmd {
 int fork1(void);  // Fork but panics on failure.
 void panic(char*);
 struct cmd *parsecmd(char*);
-void runcmd(struct cmd*) __attribute__((noreturn));
 
 // Execute cmd.  Never returns.
 void
@@ -158,8 +157,6 @@ main(void)
 
   // Read and run input commands.
   while(getcmd(buf, sizeof(buf)) >= 0){
-    /* this kind of shell is pretty weak.   $  cd  dir cannot be rqecognized well! 
-    We should use 'split the first string' to deal with the situation */
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
       buf[strlen(buf)-1] = 0;  // chop \n
@@ -181,7 +178,6 @@ panic(char *s)
   exit(1);
 }
 
-/* a closure of fork. */
 int
 fork1(void)
 {

@@ -14,7 +14,6 @@ void freerange(void *pa_start, void *pa_end);
 extern char end[]; // first address after kernel.
                    // defined by kernel.ld.
 
-// lined-list.
 struct run {
   struct run *next;
 };
@@ -49,24 +48,21 @@ kfree(void *pa)
 {
   struct run *r;
 
-  // if the pa is note completely devided by PGSIZE OR pa is in the kernel mem OR the pa is over the RAM PHYSTOP.
-  // panic!
   if(((uint64)pa % PGSIZE) != 0 || (char*)pa < end || (uint64)pa >= PHYSTOP)
     panic("kfree");
 
-  // Fill with junk to catch dangling refs. Total page was filled with junk!
+  // Fill with junk to catch dangling refs.
   memset(pa, 1, PGSIZE);
 
-  r = (struct run*)pa;// let the address pa stor a struct run
+  r = (struct run*)pa;
 
   acquire(&kmem.lock);
-  // head-push
   r->next = kmem.freelist;
-  kmem.freelist = r;// new free mem is set as the header of the linked-list. ...
+  kmem.freelist = r;
   release(&kmem.lock);
 }
 
-// Allocate one **4096-byte page** of physical memory.
+// Allocate one 4096-byte page of physical memory.
 // Returns a pointer that the kernel can use.
 // Returns 0 if the memory cannot be allocated.
 void *
@@ -76,27 +72,28 @@ kalloc(void)
 
   acquire(&kmem.lock);
   r = kmem.freelist;
-  // if !r => the mem has gone out.
   if(r)
     kmem.freelist = r->next;
   release(&kmem.lock);
 
   if(r)
-    memset((char*)r, 2, PGSIZE); // fill with junk(can be any valid integer. 5, 4, 3, 2, ....)
+    memset((char*)r, 5, PGSIZE); // fill with junk
   return (void*)r;
 }
 
 uint64
-kfreemem(void)
+getfreemem(void)
 {
+  struct run *r;
+  uint64 n = 0;
 
-	long freesize;
-	struct run *runp;
-	runp = kmem.freelist;
-	int pagenum = 0;
-	while (runp->next && pagenum < 64) 
-		pagenum++;
-  freesize = pagenum * PGSIZE;
-	return freesize;
+  acquire(&kmem.lock);
+  r = kmem.freelist;
+  while (r) {
+    ++n;
+    r = r->next;
+  }
+  release(&kmem.lock);
 
+  return n * PGSIZE;
 }

@@ -1,6 +1,5 @@
 #include "types.h"
 
-// fill with `c::Int` to dst.the `n` is the length
 void*
 memset(void *dst, int c, uint n)
 {
@@ -34,9 +33,6 @@ memmove(void *dst, const void *src, uint n)
   const char *s;
   char *d;
 
-  if(n == 0)
-    return dst;
-  
   s = src;
   d = dst;
   if(s < d && s + n > d){

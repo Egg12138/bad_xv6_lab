@@ -17,20 +17,3 @@ main(int argc, char *argv[])
   }
   exit(0);
 }
-
-uint starts_with_(char *str, char target) 
-{
-  if (str[0] == '\"' || str[0] == '\'' || str[0] == target)
-      return 1;
-  return 0;
-}
-uint ends_with_(char *str, char target) 
-{
-  while (*str) {
-    str++;
-  }
-
-  if (*str == '\"' || *str == '\'' || *str == target)
-      return 1;
-  return 0;
-}

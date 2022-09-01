@@ -1,5 +1,3 @@
-#ifndef __ASSEMBLER__
-
 // which hart (core) is this?
 static inline uint64
 r_mhartid()
@@ -10,7 +8,6 @@ r_mhartid()
 }
 
 // Machine Status Register, mstatus
-// In the Machine Mode.
 
 #define MSTATUS_MPP_MASK (3L << 11) // previous mode.
 #define MSTATUS_MPP_M (3L << 11)
@@ -18,19 +15,16 @@ r_mhartid()
 #define MSTATUS_MPP_U (0L << 11)
 #define MSTATUS_MIE (1L << 3)    // machine-mode interrupt enable.
 
-
-// read mstatus register
 static inline uint64
-r_mstatus() //read the content of register: mstatus
+r_mstatus()
 {
   uint64 x;
   asm volatile("csrr %0, mstatus" : "=r" (x) );
   return x;
-
 }
-// write x into mstatus 
+
 static inline void 
-w_mstatus(uint64 x) // write x::uint64 into the register mstatus
+w_mstatus(uint64 x)
 {
   asm volatile("csrw mstatus, %0" : : "r" (x));
 }
@@ -52,7 +46,6 @@ w_mepc(uint64 x)
 #define SSTATUS_SIE (1L << 1)  // Supervisor Interrupt Enable
 #define SSTATUS_UIE (1L << 0)  // User Interrupt Enable
 
-// Supervisor Mpde
 static inline uint64
 r_sstatus()
 {
@@ -118,7 +111,7 @@ w_mie(uint64 x)
   asm volatile("csrw mie, %0" : : "r" (x));
 }
 
-// supervisor exception program counter, holds the
+// machine exception program counter, holds the
 // instruction address to which a return from
 // exception will go.
 static inline void 
@@ -186,18 +179,6 @@ static inline void
 w_mtvec(uint64 x)
 {
   asm volatile("csrw mtvec, %0" : : "r" (x));
-}
-
-static inline void
-w_pmpcfg0(uint64 x)
-{
-  asm volatile("csrw pmpcfg0, %0" : : "r" (x));
-}
-
-static inline void
-w_pmpaddr0(uint64 x)
-{
-  asm volatile("csrw pmpaddr0, %0" : : "r" (x));
 }
 
 // use riscv's sv39 page table scheme.
@@ -290,11 +271,10 @@ intr_off()
   w_sstatus(r_sstatus() & ~SSTATUS_SIE);
 }
 
-/* are device interrupts enabled? */
+// are device interrupts enabled?
 static inline int
 intr_get()
 {
-// if ret != 0 => sstaus's bits are: .....1., where _STAUS SIE bit is enable.
   uint64 x = r_sstatus();
   return (x & SSTATUS_SIE) != 0;
 }
@@ -339,9 +319,6 @@ sfence_vma()
   asm volatile("sfence.vma zero, zero");
 }
 
-typedef uint64 pte_t;
-typedef uint64 *pagetable_t; // 512 PTEs
-#endif 
 
 #define PGSIZE 4096 // bytes per page
 #define PGSHIFT 12  // bits of offset within a page
@@ -373,3 +350,5 @@ typedef uint64 *pagetable_t; // 512 PTEs
 // that have the high bit set.
 #define MAXVA (1L << (9 + 9 + 9 + 12 - 1))
 
+typedef uint64 pte_t;
+typedef uint64 *pagetable_t; // 512 PTEs

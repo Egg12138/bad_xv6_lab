@@ -3,7 +3,6 @@
 #include "kernel/fcntl.h"
 #include "user/user.h"
 
-/* copy t to s  */
 char*
 strcpy(char *s, const char *t)
 {
@@ -71,7 +70,6 @@ gets(char *buf, int max)
   return buf;
 }
 
-/* put stat info of file `n` into struct st (by calling fstat)*/
 int
 stat(const char *n, struct stat *st)
 {
@@ -86,7 +84,6 @@ stat(const char *n, struct stat *st)
   return r;
 }
 
-/* convert num-string into int */
 int
 atoi(const char *s)
 {
@@ -98,16 +95,15 @@ atoi(const char *s)
   return n;
 }
 
-/* move n bytes from src to dst. */
 void*
 memmove(void *vdst, const void *vsrc, int n)
 {
-  unsigned char *dst;
-  const unsigned char *src;
-  // virtual address
+  char *dst;
+  const char *src;
+
   dst = vdst;
   src = vsrc;
-  if (src > dst) { // higher vadd.
+  if (src > dst) {
     while(n-- > 0)
       *dst++ = *src++;
   } else {
