@@ -157,6 +157,7 @@ freeproc(struct proc *p)
 pagetable_t
 proc_pagetable(struct proc *p)
 {
+  
   pagetable_t pagetable;
 
   // An empty page table.
@@ -235,6 +236,9 @@ userinit(void)
 
 // Grow or shrink user memory by n bytes.
 // Return 0 on success, -1 on failure.
+// the implementation way is: 
+// * Fetch user memory start entry address
+// * (by page) +- PAGE ENTRY.
 int
 growproc(int n)
 {

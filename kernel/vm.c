@@ -56,10 +56,10 @@ kvminithart()
   sfence_vma();
 }
 
-// Return the address of the PTE in page table pagetable
-// that corresponds to virtual address va.  If alloc!=0,
+// walk->定位PTE, mappages->映射Vadd=>Padd
+// **Return the address of the PTE in page table pagetable**
+// **that corresponds to virtual address va.**  If alloc!=0,
 // create any required page-table pages.
-//
 // The risc-v Sv39 scheme has three levels of page-table
 // pages. A page-table page contains 512 64-bit PTEs.
 // A 64-bit virtual address is split into five fields:
@@ -68,21 +68,25 @@ kvminithart()
 //   21..29 -- 9 bits of level-1 index.
 //   12..20 -- 9 bits of level-0 index.
 //    0..11 -- 12 bits of byte offset within the page.
+//  pagetable和pte都存放的是地址。新的页表页的物理地址会放在PTE里（多级）。 而pagetable是页表的物理地址) 
+//  pagetable的地址是物理地址
 pte_t *
 walk(pagetable_t pagetable, uint64 va, int alloc)
 {
   if(va >= MAXVA)
-    panic("walk");
+    panic("walk: VA overflow");
 
   for(int level = 2; level > 0; level--) {
-    pte_t *pte = &pagetable[PX(level, va)];
+    pte_t *pte = &pagetable[PX(level, va)];// 三个宏定义主要给PX用，实际上就是从12bit开始每一级降低9bits,低15为是offset
+    // if pte valid 
     if(*pte & PTE_V) {
       pagetable = (pagetable_t)PTE2PA(*pte);
-    } else {
+    } else { // if pte invalid => physical page hasn't been allocated. We should alloc right now:
+    // 肯定是搞新的pagetable的地址。
       if(!alloc || (pagetable = (pde_t*)kalloc()) == 0)
         return 0;
-      memset(pagetable, 0, PGSIZE);
-      *pte = PA2PTE(pagetable) | PTE_V;
+      memset(pagetable, 0, PGSIZE);// pagetable处开始，整个页表设置为0.
+      *pte = PA2PTE(pagetable) | PTE_V;//该pte表示的页表直接设置为有效。
     }
   }
   return &pagetable[PX(0, va)];
@@ -231,12 +235,13 @@ uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz)
   char *mem;
   uint64 a;
 
+// only alloc, not shrink.
   if(newsz < oldsz)
     return oldsz;
 
   oldsz = PGROUNDUP(oldsz);
   for(a = oldsz; a < newsz; a += PGSIZE){
-    mem = kalloc();
+    mem = kalloc();// 实际上kalloc只做了把freelist的去头工作
     if(mem == 0){
       uvmdealloc(pagetable, a, oldsz);
       return 0;
