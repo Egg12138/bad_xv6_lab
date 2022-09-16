@@ -657,6 +657,8 @@ namex(char *path, int nameiparent, char *name)
   return ip;
 }
 
+// return inode.
+// 需要注意namex因为调用了iput所以才需要namei作transaction
 struct inode*
 namei(char *path)
 {

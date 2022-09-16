@@ -333,15 +333,19 @@ sfence_vma()
 #define PTE_U (1L << 4) // 1 -> user can access
 
 // shift a physical address to the right place for a PTE.
+// 去除传入的物理地址所对应的页表项(运算结果就是PTE的内容)
 #define PA2PTE(pa) ((((uint64)pa) >> 12) << 10)
 
+// PTE的63..53 保留位， VA的低12位为Offset.PTE是个uint64.
+// *pte >> 10, 即将高10保留位置零。同时会损失低10位flags.
+// 移动后, 新*pte再<<12。此时 
 #define PTE2PA(pte) (((pte) >> 10) << 12)
 
 #define PTE_FLAGS(pte) ((pte) & 0x3FF)
 
 // extract the three 9-bit page table indices from a virtual address.
-#define PXMASK          0x1FF // 9 bits
-#define PXSHIFT(level)  (PGSHIFT+(9*(level)))
+#define PXMASK          0x1FF // 9 bits, 0b111111111
+#define PXSHIFT(level)  (PGSHIFT+(9*(level)))// shift位数计算
 #define PX(level, va) ((((uint64) (va)) >> PXSHIFT(level)) & PXMASK)
 
 // one beyond the highest possible virtual address.

@@ -44,7 +44,7 @@ sys_sbrk(void)
 {
   int addr;
   int n;
-
+  // n is dependent on the a0 register
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
