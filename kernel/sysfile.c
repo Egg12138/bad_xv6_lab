@@ -462,6 +462,7 @@ sys_pipe(void)
   int fd0, fd1;
   struct proc *p = myproc();
 
+  // fetch 0th argument.
   if(argaddr(0, &fdarray) < 0)
     return -1;
   if(pipealloc(&rf, &wf) < 0)
