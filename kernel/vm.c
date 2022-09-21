@@ -24,6 +24,7 @@ kvminit()
   kernel_pagetable = (pagetable_t) kalloc();
   memset(kernel_pagetable, 0, PGSIZE);
 
+  // 通过kvmmap来为从虚拟地址va(va对应从物理地址arg1处开始的物理地址空间)开始的虚拟地址空间创建PTEs。
   // uart registers
   kvmmap(UART0, UART0, PGSIZE, PTE_R | PTE_W);
 

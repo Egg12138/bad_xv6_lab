@@ -1,3 +1,21 @@
+/// @syntax: asm("asm code" : outputs : inputs : clobbers);
+/// @outputs: reg/mem, containing outputs 
+/// @inputs: reg/mem, containing inputs
+/// @clobbers: reg/mem, overwritten, not explicitly marked as inputs.不必关注他们的值
+/// @volatile: 禁用优化
+/// @outputs:
+/// • “=r”: specifies a register (compiler decides which one)
+/// • “=m” specifies a memory location
+/// • “=rm” specifies either a register or memory location
+/// @inputs: 
+/// • “r”: specifies a register (compiler decides which one)
+/// • “m” specifies a memory location
+/// • “rm” specifies either a register or memory location
+/// @clobbers:
+/// • Specific registers
+/// • “memory” or “cc”
+
+
 // which hart (core) is this?
 static inline uint64
 r_mhartid()
@@ -264,7 +282,7 @@ intr_on()
   w_sstatus(r_sstatus() | SSTATUS_SIE);
 }
 
-// disable device interrupts
+// disable device interrupts, write SIT bit to zero
 static inline void
 intr_off()
 {
@@ -276,7 +294,7 @@ static inline int
 intr_get()
 {
   uint64 x = r_sstatus();
-  return (x & SSTATUS_SIE) != 0;
+  return (x & SSTATUS_SIE) != 0;// SIE bit = 1 => supervisor interrupt enable
 }
 
 static inline uint64

@@ -32,7 +32,7 @@ trapinithart(void)
 //
 // handle an interrupt, exception, or system call from user space.
 // called from trampoline.S
-//
+// 确定trap的原因，处理它，然后返回
 void
 usertrap(void)
 {
@@ -51,13 +51,14 @@ usertrap(void)
   p->trapframe->epc = r_sepc();
   
   if(r_scause() == 8){
-    // system call
+    // if trap is system call
 
     if(p->killed)
       exit(-1);
 
     // sepc points to the ecall instruction,
     // but we want to return to the next instruction.
+    // 栈是从高到低的，所以删除用+=4.
     p->trapframe->epc += 4;
 
     // an interrupt will change sstatus &c registers,
@@ -67,11 +68,13 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
+
   } else {
+    // 如果不是 device intr 那就是异常 
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
     p->killed = 1;
-  }
+  }   
 
   if(p->killed)
     exit(-1);
@@ -85,15 +88,18 @@ usertrap(void)
 
 //
 // return to user space
+// approache:
+//    
 //
 void
 usertrapret(void)
 {
+  // get current proc.
   struct proc *p = myproc();
 
   // we're about to switch the destination of traps from
-  // kerneltrap() to usertrap(), so turn off interrupts until
-  // we're back in user space, where usertrap() is correct.
+  // kerneltrap() to usertrap(), so 禁用 interrupts 直到 we're back in user space
+  // where usertrap() is correct.
   intr_off();
 
   // send syscalls, interrupts, and exceptions to trampoline.S
@@ -138,6 +144,7 @@ kerneltrap()
   uint64 sstatus = r_sstatus();
   uint64 scause = r_scause();
   
+  // 
   if((sstatus & SSTATUS_SPP) == 0)
     panic("kerneltrap: not from supervisor mode");
   if(intr_get() != 0)

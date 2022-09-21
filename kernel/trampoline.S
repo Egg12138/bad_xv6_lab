@@ -23,11 +23,13 @@ uservec:
         # sscratch points to where the process's p->trapframe is
         # mapped into user space, at TRAPFRAME.
         #
-        
 	# swap a0 and sscratch
         # so that a0 is TRAPFRAME
+        # Control and Status Register Read and Write.
+ 
         csrrw a0, sscratch, a0
 
+        # sd 是 双字存储 Store Double.
         # save the user registers in TRAPFRAME
         sd ra, 40(a0)
         sd sp, 48(a0)

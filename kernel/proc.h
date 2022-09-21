@@ -56,14 +56,14 @@ struct trapframe {
   /*  88 */ uint64 t2;
   /*  96 */ uint64 s0;
   /* 104 */ uint64 s1;
-  /* 112 */ uint64 a0;
-  /* 120 */ uint64 a1;
+  /* 112 */ uint64 a0;              // exec arg0
+  /* 120 */ uint64 a1;              // exec arg1
   /* 128 */ uint64 a2;
   /* 136 */ uint64 a3;
   /* 144 */ uint64 a4;
   /* 152 */ uint64 a5;
   /* 160 */ uint64 a6;
-  /* 168 */ uint64 a7;
+  /* 168 */ uint64 a7;              // save syscall number
   /* 176 */ uint64 s2;
   /* 184 */ uint64 s3;
   /* 192 */ uint64 s4;
@@ -99,7 +99,7 @@ struct proc {
   uint64 kstack;               // Virtual address of kernel stack
   uint64 sz;                   // Size of process memory (bytes)
   pagetable_t pagetable;       // User page table
-  struct trapframe *trapframe; // data page for trampoline.S
+  struct trapframe *trapframe; // data page for trampoline.S  (Physical Address!!)
   struct context context;      // swtch() here to run process
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
